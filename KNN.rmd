@@ -1,0 +1,105 @@
+---
+title: "HW2_3.1.a1"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r  KKNN}
+
+#### Installing and calling packages
+
+library(kknn)
+
+#### Reading the data
+
+data <- read.table("credit_card_data.txt", stringsAsFactors = FALSE, header = FALSE)
+
+#### Setting the random number generator seed so that our results are reproducible
+
+set.seed(1)
+
+## set maximum value of k (number of neighbors) to test
+
+kmax <- 20
+
+## create array of prediction qualities
+
+accuracy_cv_knn <- rep(0,kmax)
+
+```
+
+```{r run knn1}
+
+# calculate prediction qualities
+
+for (k in 1:kmax) {
+    # run cross-validation for each value of k (number of neighbors)
+    model <- cv.kknn(V11~.,data,kcv=5, # 5-fold cross-validation
+                                k=k, # number of neighbors
+                                scale=TRUE) # scale data
+
+    predicted <- as.integer(model[[1]][,2] + 0.5) # round off to 0 or 1
+    accuracy_cv_knn[k] <- sum(predicted == data$V11)/length(data$V11)
+}
+
+# show accuracies
+
+accuracy_cv_knn
+
+```
+
+``` {r plot}
+# plot the change in the accuracy with change in value of K
+
+plot(accuracy_cv_knn, xlab = 'k-value' ,type = 'l', col = 'blue')
+```
+
+
+```{r best k value}
+#optimal value of K
+cat("Best KNN model is k=",which.max(accuracy_cv_knn),'\n')
+cat("Best accuracy in KNN model is ",max(accuracy_cv_knn),'\n') 
+```
+```{r ananlysis}
+#For the value of K = 12, model with five fold cross validation gives highest accuracy
+```
+
+```{r run k}
+for (i in 1:nrow(data))
+out <- cv.kknn(V11~.,data
+               ,kcv=5, # 5-fold cross-validation
+                                k=12, # number of neighbors
+                                scale=TRUE) # scale data
+
+predicted <- as.integer(model[[1]][,2] + 0.5) # round off to 0 or 1
+accuracy_knn_12 <- sum(predicted == data$V11)/length(data$V11)
+
+#mean absolute error
+cat("mean absolute error",out[[2]][1],'\n')
+
+#mean squared error
+cat("mean squared error",out[[2]][2],'\n')
+?cv.knn
+```
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
